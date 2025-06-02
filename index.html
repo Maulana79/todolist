@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-G">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Log v2.0 - Tailwind Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body {
+         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fallback font */
+    }
+
+    /* CSS Custom untuk Mobile */
+    @media (max-width: 639px) { /* Target layar lebih kecil dari sm (640px) */
+        /* Contoh untuk grup input utama */
+        /* Misalkan div pembungkus utama grup input punya ID atau kelas khusus untuk ditarget */
+        /* Jika kita target berdasarkan struktur yang ada sekarang: */
+        /* div.flex.mb-6.shadow-md.rounded-md.items-stretch (ini agak terlalu spesifik dan rentan) */
+
+        /* Lebih baik jika kita beri ID pada div pembungkus grup input, misal id="inputGroup" */
+        <div id="inputGroup" class="flex mb-6 shadow-md rounded-md items-stretch"> 
+
+        #inputGroup {
+            flex-direction: column; /* Susun vertikal */
+            align-items: stretch; /* Pastikan item meregang penuh lebar */
+        } 
+
+        /* Anda perlu target setiap elemen di dalamnya */
+        #inputGroup > input,
+        #inputGroup > div.relative, /* Wrapper select dan date */
+        #inputGroup > button {
+            width: 100% !important; /* Paksa lebar penuh, !important mungkin perlu jika Tailwind kuat */
+            margin-bottom: 0.75rem; /* Beri jarak antar item yang tersusun vertikal */
+            /* Hapus rounding spesifik jika diperlukan untuk tampilan tumpuk */
+            border-radius: 0.375rem !important; /* contoh: buat semua rounded-md */
+            border-right-width: 2px !important; /* Kembalikan border kanan jika perlu */
+            border-left-width: 2px !important; /* Kembalikan border kiri jika perlu */
+        }
+
+        /* Khusus untuk select dan date di dalam wrapper-nya agar width-nya juga 100% */
+        #newTaskPriority, #newTaskDueDate {
+            width: 100% !important;
+        }
+
+        /* Anda mungkin juga perlu menyesuaikan padding atau font-size di sini */
+        #newTaskInput, #newTaskPriority, #newTaskDueDate, #addTaskBtn {
+            font-size: 0.5rem; /* Contoh: text-sm */
+            padding: 0.5rem; /* Contoh: p-2 */
+        } 
+
+        /* Contoh spesifik untuk menghilangkan border yang tidak perlu saat tumpuk */
+        #newTaskInput { border-right-width: 2px !important; } */
+        #newTaskPriority { border-left-width: 2px !important; border-right-width: 2px !important; } */
+        #newTaskDueDate { border-left-width: 2px !important; border-right-width: 2px !important; } */
+        #addTaskBtn { border-left-width: 2px !important; } */
+
+    }
+    @media (max-width: 720px) { /* Target layar lebih kecil dari sm (640px) */
+        /* Contoh untuk grup input utama */
+        /* Misalkan div pembungkus utama grup input punya ID atau kelas khusus untuk ditarget */
+        /* Jika kita target berdasarkan struktur yang ada sekarang: */
+        /* div.flex.mb-6.shadow-md.rounded-md.items-stretch (ini agak terlalu spesifik dan rentan) */
+
+        /* Lebih baik jika kita beri ID pada div pembungkus grup input, misal id="inputGroup" */
+        <div id="inputGroup" class="flex mb-6 shadow-md rounded-md items-stretch"> 
+
+        #inputGroup {
+            flex-direction: column; /* Susun vertikal */
+            align-items: stretch; /* Pastikan item meregang penuh lebar */
+        } 
+
+        /* Anda perlu target setiap elemen di dalamnya */
+        #inputGroup > input,
+        #inputGroup > div.relative, /* Wrapper select dan date */
+        #inputGroup > button {
+            width: 100% !important; /* Paksa lebar penuh, !important mungkin perlu jika Tailwind kuat */
+            margin-bottom: 0.75rem; /* Beri jarak antar item yang tersusun vertikal */
+            /* Hapus rounding spesifik jika diperlukan untuk tampilan tumpuk */
+            border-radius: 0.375rem !important; /* contoh: buat semua rounded-md */
+            border-right-width: 2px !important; /* Kembalikan border kanan jika perlu */
+            border-left-width: 2px !important; /* Kembalikan border kiri jika perlu */
+        }
+
+        /* Khusus untuk select dan date di dalam wrapper-nya agar width-nya juga 100% */
+        #newTaskPriority, #newTaskDueDate {
+            width: 100% !important;
+        }
+
+        /* Anda mungkin juga perlu menyesuaikan padding atau font-size di sini */
+        #newTaskInput, #newTaskPriority, #newTaskDueDate, #addTaskBtn {
+            font-size: 0.7rem; /* Contoh: text-sm */
+            padding: 0.6rem; /* Contoh: p-2 */
+        } 
+
+        /* Contoh spesifik untuk menghilangkan border yang tidak perlu saat tumpuk */
+        #newTaskInput { border-right-width: 2px !important; } */
+        #newTaskPriority { border-left-width: 2px !important; border-right-width: 2px !important; } */
+        #newTaskDueDate { border-left-width: 2px !important; border-right-width: 2px !important; } */
+        #addTaskBtn { border-left-width: 2px !important; } */
+
+    }
+</style>
+</head>
+<body class="font-mono bg-slate-900 text-gray-300 flex flex-col justify-center items-center min-h-screen p-4">
+    <div class="bg-slate-800 p-6 md:p-8 rounded-lg shadow-2xl w-full sm:w-11/12 md:w-3/4 lg:w-1/2 max-w-2xl">
+        <header class="text-center mb-6 md:mb-8">
+            <h1 class="text-cyan-400 font-bold text-3xl md:text-4xl tracking-wider">
+                <span class="filter drop-shadow-[0_0_3px_#00ffff]">MISSION</span> LOG
+            </h1>
+            <p class="text-gray-500 text-sm mt-1">Track your objectives, pilot.</p>
+        </header>
+
+        <div id="progressSummary" class="text-center text-sm text-cyan-400 mb-4 font-mono transition-opacity duration-300 ease-in-out opacity-0">
+            Calculating mission status...
+        </div>
+
+        <div class="flex mb-6 shadow-md rounded-md items-stretch"> 
+            <input 
+                type="text" 
+                id="newTaskInput" 
+                placeholder="Enter New Objective..."
+                class="flex-grow p-3 border-2 border-slate-600 bg-slate-700 text-gray-200 rounded-l-md border-r-0 
+                       focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none 
+                       font-mono text-base placeholder-gray-500" >
+            <div class="relative flex"> <select 
+                    id="newTaskPriority" 
+                    aria-label="Task Priority"
+                    class="bg-slate-700 border-y-2 border-l-2 border-slate-600 border-r-0 
+                           text-gray-300 text-base focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none 
+                           p-3 pr-8 font-mono appearance-none w-full" >
+                    <option value="Normal" class="font-mono bg-slate-700 text-gray-200">Normal</option>
+                    <option value="High" class="font-mono bg-slate-700 text-gray-200">High</option>
+                    <option value="Critical" class="font-mono bg-slate-700 text-gray-200">Emergency</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                </div>
+            </div>
+            <div class="relative flex"> <input 
+                    type="date" 
+                    id="newTaskDueDate" 
+                    aria-label="Task Due Date"
+                    class="bg-slate-700 border-y-2 border-l-2 border-slate-600 border-r-0 
+                           text-gray-300 text-base focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none 
+                           p-3 font-mono appearance-none w-full" title="Due Date"
+                >
+            </div>
+            <button 
+                id="addTaskBtn"
+                class="bg-cyan-500 text-slate-900 font-semibold p-3 rounded-r-md 
+                       cursor-pointer font-mono text-base transition-colors 
+                       duration-300 hover:bg-cyan-400 active:bg-cyan-600
+                       border-y-2 border-r-2 border-cyan-500 
+                       border-l-2 border-slate-600" >
+                INITIATE
+            </button>
+        </div>
+
+        <div class="mb-4 md:mb-6">
+            <input 
+                type="search" 
+                id="searchInput" 
+                placeholder="Search Objectives (e.g., 'critical system check')"
+                aria-label="Search Objectives"
+                class="w-full p-3 border-2 border-slate-600 bg-slate-700 text-gray-200 rounded-md 
+                       focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none 
+                       font-mono text-base placeholder-gray-500 shadow-sm"
+            >
+        </div>
+        <div id="filterControls" class="flex flex-wrap justify-center space-x-2 mb-4 md:mb-6">
+            <button data-filter="all" 
+                    class="filter-btn bg-cyan-600 text-white font-semibold py-2 px-4 rounded-md text-xs mx-1 my-1 transition-colors duration-200 hover:bg-cyan-500 active-filter">
+                ALL MISSIONS
+            </button>
+            <button data-filter="active" 
+                    class="filter-btn bg-slate-600 text-gray-300 font-semibold py-2 px-4 rounded-md text-xs mx-1 my-1 transition-colors duration-200 hover:bg-slate-500">
+                ACTIVE
+            </button>
+            <button data-filter="completed" 
+                    class="filter-btn bg-slate-600 text-gray-300 font-semibold py-2 px-4 rounded-md text-xs mx-1 my-1 transition-colors duration-200 hover:bg-slate-500">
+                COMPLETED
+            </button>
+        </div>
+        <div id="sortControls" class="flex justify-center mb-4 md:mb-6">
+            <button id="sortPriorityBtn" 
+                    class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md text-xs mx-1 my-1 transition-colors duration-200 shadow">
+                SORT: PRIORITY (EMERGENCY FIRST)
+            </button>
+        </div>
+        <ul id="taskList" class="list-none p-0">
+            </ul>
+            
+        <div id="emptyStateMessage" class="hidden text-center text-slate-400 p-6 md:p-8 rounded-md bg-slate-700/30 mt-4 border border-slate-700 transition-all duration-300 ease-in-out opacity-0 scale-95">
+            <svg class="mx-auto h-12 w-12 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.604 7.197A7.5 7.5 0 0112 4.5v.001m0 0A7.5 7.5 0 0119.396 7.197M12 4.5v3.75m-3.75 0V7.197m3.75 0V7.197m0 0A2.25 2.25 0 0114.25 9.75H9.75A2.25 2.25 0 0112 7.5m0 0v2.25m0 0A2.25 2.25 0 009.75 12H14.25a2.25 2.25 0 000-4.5H9.75a2.25 2.25 0 00-2.25 2.25M12 15V4.5m0 15v-2.25A2.25 2.25 0 009.75 15H4.5A2.25 2.25 0 002.25 17.25v.001A2.25 2.25 0 004.5 19.5h15a2.25 2.25 0 002.25-2.25v-.001a2.25 2.25 0 00-2.25-2.25h-5.25A2.25 2.25 0 0012 15" />
+            </svg>
+            <h3 class="mt-3 text-lg font-semibold text-slate-300">Mission Log Clear</h3>
+            <p class="mt-1 text-sm text-slate-400">No objectives match your current parameters, Commander. Or perhaps it's time for a new directive?</p>
+        </div>
+    </div>
+
+    <footer class="text-center mt-8 text-gray-600 text-xs">
+        Mission Log v2.0 - Commander <span class="text-cyan-500">Muhammad Maulana</span>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM fully loaded and parsed. Initializing Mission Log script v.DueDate+SortCycle...');
+
+            // --- Deklarasi Variabel Utama ---
+            const newTaskInput = document.getElementById('newTaskInput');
+            const newTaskPriorityInput = document.getElementById('newTaskPriority');
+            const newTaskDueDateInput = document.getElementById('newTaskDueDate');
+            const addTaskButton = document.getElementById('addTaskBtn');
+            const taskList = document.getElementById('taskList');
+            const filterButtonsContainer = document.getElementById('filterControls');
+            const searchInput = document.getElementById('searchInput');
+            const progressSummaryElement = document.getElementById('progressSummary');
+            const emptyStateMessageElement = document.getElementById('emptyStateMessage');
+            const sortButton = document.getElementById('sortPriorityBtn'); // Menggunakan ID yang sudah ada
+
+            // --- Variabel untuk Modal Konfirmasi ---
+            const confirmationModal = document.getElementById('confirmationModal');
+            const modalDialog = document.getElementById('modalDialog');
+            const modalTitleElement = document.getElementById('modalTitle'); 
+            const modalMessageElement = document.getElementById('modalMessage'); 
+            const modalConfirmButton = document.getElementById('modalConfirmButton');
+            const modalCancelButton = document.getElementById('modalCancelButton');
+            let actionToConfirmCallback = null; 
+
+            // --- Fungsi untuk Modal ---
+            function showConfirmationModal(title, message, onConfirm) {
+                if (!confirmationModal || !modalDialog || !modalTitleElement || !modalMessageElement) {
+                    console.error("Modal elements not found!");
+                    return;
+                }
+                modalTitleElement.textContent = title;
+                modalMessageElement.textContent = message;
+                actionToConfirmCallback = onConfirm; 
+
+                confirmationModal.classList.remove('hidden');
+                setTimeout(() => { 
+                    confirmationModal.classList.remove('opacity-0');
+                    modalDialog.classList.remove('scale-95');
+                    modalDialog.classList.add('scale-100');
+                }, 10);
+            }
+
+            function hideConfirmationModal() {
+                if (!confirmationModal || !modalDialog) {
+                    console.error("Modal elements not found for hiding!");
+                    return;
+                }
+                confirmationModal.classList.add('opacity-0');
+                modalDialog.classList.add('scale-95');
+                modalDialog.classList.remove('scale-100');
+                setTimeout(() => { 
+                    confirmationModal.classList.add('hidden');
+                    actionToConfirmCallback = null; 
+                }, 300); 
+            }
+            
+            // --- Fungsi Inti Aplikasi ---
+            function getBorderClass(priority, isCompleted) {
+                if (isCompleted) {
+                    return 'border-red-500 opacity-70';
+                }
+                switch (priority) {
+                    case 'Critical':
+                        return 'border-fuchsia-500';
+                    case 'High':
+                        return 'border-amber-400';
+                    case 'Normal':
+                    default:
+                        return 'border-cyan-500';
+                }
+            }
+            
+            function updateProgressSummary() {
+                if (!progressSummaryElement) return; 
+                const allTasks = JSON.parse(localStorage.getItem('missionLogTasks')) || [];
+                const totalTasks = allTasks.length;
+                const completedTasks = allTasks.filter(task => task.isCompleted).length;
+
+                if (totalTasks > 0) {
+                    progressSummaryElement.textContent = `${completedTasks} of ${totalTasks} Objectives Cleared`;
+                } else {
+                    progressSummaryElement.textContent = 'No Active Directives.';
+                }
+                progressSummaryElement.classList.remove('opacity-0'); 
+            }
+
+            function renderFilteredTasks() {
+                if (!taskList || !searchInput || !emptyStateMessageElement) {
+                    console.error("One or more elements for filtering/rendering not found.");
+                    return;
+                }
+                const currentStatusFilter = document.querySelector('#filterControls .active-filter')?.dataset.filter || 'all';
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const tasksOnPage = taskList.querySelectorAll('li');
+                let visibleTasksCount = 0;
+
+                tasksOnPage.forEach(task => {
+                    const taskSpan = task.querySelector('span.task-text');
+                    if (!taskSpan) return;
+
+                    const taskText = taskSpan.textContent.toLowerCase();
+                    const isCompleted = taskSpan.classList.contains('line-through');
+                    
+                    let matchesStatusFilter = false;
+                    switch (currentStatusFilter) {
+                        case 'active':
+                            if (!isCompleted) matchesStatusFilter = true;
+                            break;
+                        case 'completed':
+                            if (isCompleted) matchesStatusFilter = true;
+                            break;
+                        case 'all':
+                        default:
+                            matchesStatusFilter = true;
+                            break;
+                    }
+
+                    const matchesSearchTerm = searchTerm === '' || taskText.includes(searchTerm);
+
+                    if (matchesStatusFilter && matchesSearchTerm) {
+                        task.classList.remove('hidden');
+                        visibleTasksCount++;
+                    } else {
+                        task.classList.add('hidden');
+                    }
+                });
+
+                if (emptyStateMessageElement) { 
+                    if (visibleTasksCount === 0 && taskList.children.length >= 0) { 
+                        emptyStateMessageElement.classList.remove('hidden', 'opacity-0', 'scale-95');
+                        emptyStateMessageElement.classList.add('opacity-100', 'scale-100');
+                    } else {
+                        emptyStateMessageElement.classList.add('opacity-0', 'scale-95');
+                        setTimeout(() => {
+                            emptyStateMessageElement.classList.add('hidden');
+                        }, 300); 
+                    }
+                }
+            }
+
+            function loadTasks() {
+                if (!taskList) { console.error("Task list element not found for loading tasks."); return; }
+                const tasks = JSON.parse(localStorage.getItem('missionLogTasks')) || [];
+                taskList.innerHTML = ''; 
+                tasks.forEach(task => createTaskElement(task.text, task.isCompleted, task.priority || 'Normal', task.dueDate || ''));
+                updateProgressSummary(); 
+                // Pengurutan awal tidak diterapkan, biarkan user yang klik tombol sort.
+                // Jika ingin ada default sort saat load, panggil applyCurrentSort() di sini.
+                renderFilteredTasks(); 
+            }
+
+            function saveTasks() {
+                if (!taskList) { console.error("Task list element not found for saving tasks."); return; }
+                const tasksData = [];
+                taskList.querySelectorAll('li').forEach(li => { 
+                    const taskSpan = li.querySelector('span.task-text');
+                    if (taskSpan && taskList.contains(li) && !li.classList.contains('opacity-0')) { 
+                        tasksData.push({
+                            text: taskSpan.textContent,
+                            isCompleted: taskSpan.classList.contains('line-through'),
+                            priority: li.dataset.priority || 'Normal',
+                            dueDate: li.dataset.dueDate || '' 
+                        });
+                    }
+                });
+                localStorage.setItem('missionLogTasks', JSON.stringify(tasksData));
+                updateProgressSummary(); 
+            }
+            
+            function createTaskElement(taskText, isCompleted = false, priority = 'Normal', dueDate = '') {
+                // ... (Fungsi ini tetap sama persis seperti versi terakhir yang sudah berfungsi dengan Due Dates)
+                // Pastikan ini adalah versi lengkap dan benar dari file Anda.
+                // Saya akan sertakan lagi di bawah untuk kepastian.
+                if (!taskList) { console.error("Task list element not found for creating task element."); return; }
+                const listItem = document.createElement('li');
+                listItem.dataset.priority = priority; 
+                listItem.dataset.dueDate = dueDate; 
+
+                const currentBorderClass = getBorderClass(priority, isCompleted);
+                listItem.className = `bg-slate-700 p-3 mb-3 rounded-md flex flex-col sm:flex-row sm:justify-between sm:items-center shadow-md transition-all duration-300 ease-in-out border-l-4 ${currentBorderClass}`;
+                
+                const textAndDateWrapper = document.createElement('div');
+                textAndDateWrapper.className = 'flex-grow mb-2 sm:mb-0 mr-2';
+
+                const taskSpan = document.createElement('span');
+                taskSpan.textContent = taskText;
+                taskSpan.className = `task-text break-all block`; 
+
+                textAndDateWrapper.appendChild(taskSpan);
+
+                if (dueDate) {
+                    const dueDateSpan = document.createElement('span');
+                    dueDateSpan.textContent = `Due: ${dueDate}`;
+                    dueDateSpan.className = 'task-due-date text-xs text-slate-400 block sm:inline sm:ml-0 mt-1 sm:mt-0';
+                    
+                    const today = new Date();
+                    today.setHours(0,0,0,0); 
+                    const dueDateObj = new Date(dueDate + 'T00:00:00Z'); 
+
+                    if (!isCompleted && dueDateObj < today) {
+                        dueDateSpan.classList.add('text-red-400', 'font-semibold');
+                        dueDateSpan.textContent += ' (OVERDUE)';
+                    } else if (!isCompleted && dueDateObj.getTime() === today.getTime()) {
+                        dueDateSpan.classList.add('text-amber-400', 'font-semibold');
+                        dueDateSpan.textContent += ' (TODAY)';
+                    }
+                    textAndDateWrapper.appendChild(dueDateSpan);
+                }
+                
+                listItem.appendChild(textAndDateWrapper); 
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'flex-shrink-0 flex items-center self-start sm:self-center w-full sm:w-auto justify-end mt-2 sm:mt-0';
+
+                const completeButton = document.createElement('button');
+                completeButton.className = `py-1 px-2 ml-0 sm:ml-2 text-xs font-semibold rounded-sm transition-colors duration-200`;
+                
+                const editButton = document.createElement('button');
+                editButton.textContent = 'EDIT';
+                editButton.className = 'text-blue-500 hover:text-blue-400 active:text-blue-600 py-1 px-2 ml-2 text-xs font-semibold rounded-sm transition-colors duration-200';
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'ERASE';
+                deleteButton.className = 'text-red-500 hover:text-red-400 active:text-red-600 py-1 px-2 ml-2 text-xs font-semibold rounded-sm transition-colors duration-200';
+
+                let originalEditButtonClickHandler; 
+
+                function updateVisualsBasedOnState() {
+                    const currentPriority = listItem.dataset.priority || 'Normal';
+                    const isTaskCompleted = taskSpan.classList.contains('line-through');
+                    const isCurrentlyEditing = editButton.textContent === 'SAVE';
+
+                    const oldBorderClasses = ['border-cyan-500', 'border-amber-400', 'border-fuchsia-500', 'border-red-500', 'opacity-70'];
+                    oldBorderClasses.forEach(cls => listItem.classList.remove(cls));
+                    listItem.classList.add(...getBorderClass(currentPriority, isTaskCompleted).split(' '));
+                    
+                    const dueDateSpanExisting = textAndDateWrapper.querySelector('.task-due-date');
+                    if(dueDateSpanExisting){
+                        dueDateSpanExisting.classList.remove('text-red-400', 'text-amber-400', 'font-semibold', 'text-slate-500', 'text-slate-400'); // Reset semua warna kondisi
+                        dueDateSpanExisting.textContent = `Due: ${listItem.dataset.dueDate}`; 
+                        if(isTaskCompleted){
+                            dueDateSpanExisting.classList.add('text-slate-500'); 
+                        } else {
+                             const today = new Date(); today.setHours(0,0,0,0);
+                             const dueDateObj = new Date(listItem.dataset.dueDate + 'T00:00:00Z'); 
+                             if (dueDateObj < today) {
+                                 dueDateSpanExisting.classList.add('text-red-400', 'font-semibold');
+                                 dueDateSpanExisting.textContent += ' (OVERDUE)';
+                             } else if (dueDateObj.getTime() === today.getTime()) {
+                                 dueDateSpanExisting.classList.add('text-amber-400', 'font-semibold');
+                                 dueDateSpanExisting.textContent += ' (TODAY)';
+                             } else {
+                                dueDateSpanExisting.classList.add('text-slate-400'); // Warna default jika tidak overdue/today
+                             }
+                        }
+                    }
+
+                    if (isTaskCompleted) {
+                        taskSpan.classList.add('text-gray-500', 'line-through'); 
+                        taskSpan.classList.remove('text-gray-200');
+                        completeButton.textContent = 'UNDO';
+                        completeButton.classList.add('text-yellow-500', 'hover:text-yellow-400');
+                        completeButton.classList.remove('text-green-500', 'hover:text-green-400');
+                        if (!isCurrentlyEditing) editButton.classList.add('hidden'); 
+                    } else {
+                        taskSpan.classList.add('text-gray-200');
+                        taskSpan.classList.remove('text-gray-500', 'line-through'); 
+                        completeButton.textContent = 'DONE';
+                        completeButton.classList.add('text-green-500', 'hover:text-green-400');
+                        completeButton.classList.remove('text-yellow-500', 'hover:text-yellow-400');
+                        if (!isCurrentlyEditing) editButton.classList.remove('hidden');
+                    }
+                }
+
+                if (isCompleted) {
+                    taskSpan.classList.add('line-through'); 
+                }
+                updateVisualsBasedOnState(); 
+
+                completeButton.addEventListener('click', () => {
+                    taskSpan.classList.toggle('line-through');
+                    updateVisualsBasedOnState(); 
+                    saveTasks(); 
+                    renderFilteredTasks(); 
+                });
+
+                function enterEditMode() {
+                    if (taskSpan.classList.contains('line-through')) return; 
+                    
+                    textAndDateWrapper.classList.add('hidden'); 
+                    
+                    const editInput = document.createElement('input');
+                    editInput.type = 'text';
+                    editInput.value = taskSpan.textContent; 
+                    editInput.className = 'edit-text-input flex-grow p-1 border border-slate-500 bg-slate-600 text-gray-200 rounded-sm text-sm mr-1 focus:ring-1 focus:ring-cyan-500 outline-none';
+                    
+                    const editPrioritySelect = document.createElement('select');
+                    editPrioritySelect.className = 'edit-priority-select bg-slate-600 border border-slate-500 text-gray-200 text-xs rounded-sm p-1 mr-1 focus:ring-1 focus:ring-cyan-500 outline-none appearance-none h-full';
+                    const priorities = ['Normal', 'High', 'Critical'];
+                    priorities.forEach(prio => {
+                        const option = document.createElement('option');
+                        option.value = prio; option.textContent = prio; option.className = 'font-mono bg-slate-700 text-gray-200';
+                        if (prio === listItem.dataset.priority) option.selected = true;
+                        editPrioritySelect.appendChild(option);
+                    });
+
+                    const editDueDateInput = document.createElement('input'); 
+                    editDueDateInput.type = 'date';
+                    editDueDateInput.value = listItem.dataset.dueDate || '';
+                    editDueDateInput.className = 'edit-due-date-input bg-slate-600 border border-slate-500 text-gray-200 text-xs rounded-sm p-1 focus:ring-1 focus:ring-cyan-500 outline-none appearance-none h-full';
+                    
+                    const editControlsWrapper = document.createElement('div');
+                    editControlsWrapper.className = 'flex-grow flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-1 w-full mb-2 sm:mb-0'; 
+                    editControlsWrapper.appendChild(editInput);
+                    editControlsWrapper.appendChild(editPrioritySelect);
+                    editControlsWrapper.appendChild(editDueDateInput); 
+
+                    listItem.insertBefore(editControlsWrapper, actionsDiv); 
+                    editInput.focus(); 
+
+                    editButton.textContent = 'SAVE';
+                    editButton.classList.remove('text-blue-500');
+                    editButton.classList.add('text-orange-500', 'hover:text-orange-400');
+                    completeButton.classList.add('hidden'); 
+                    deleteButton.classList.add('hidden'); 
+
+                    function saveEditChanges() {
+                        const newText = editInput.value.trim();
+                        const newPriority = editPrioritySelect.value;
+                        const newDueDate = editDueDateInput.value;
+
+                        if (newText) {
+                            taskSpan.textContent = newText;
+                        }
+                        listItem.dataset.priority = newPriority; 
+                        listItem.dataset.dueDate = newDueDate; 
+
+                        let dueDateSpanExisting = textAndDateWrapper.querySelector('.task-due-date');
+                        if (newDueDate) {
+                            if (!dueDateSpanExisting) {
+                                dueDateSpanExisting = document.createElement('span');
+                                dueDateSpanExisting.className = 'task-due-date text-xs text-slate-400 block sm:inline sm:ml-0 mt-1 sm:mt-0'; 
+                                textAndDateWrapper.appendChild(dueDateSpanExisting);
+                            }
+                        } else if (dueDateSpanExisting) {
+                            textAndDateWrapper.removeChild(dueDateSpanExisting); 
+                        }
+
+                        listItem.removeChild(editControlsWrapper); 
+                        textAndDateWrapper.classList.remove('hidden'); 
+
+                        editButton.textContent = 'EDIT';
+                        editButton.removeEventListener('click', saveEditChanges); 
+                        if(originalEditButtonClickHandler) editButton.addEventListener('click', originalEditButtonClickHandler); 
+                        editButton.classList.remove('text-orange-500', 'hover:text-orange-400');
+                        editButton.classList.add('text-blue-500', 'hover:text-blue-400');
+                        completeButton.classList.remove('hidden');
+                        deleteButton.classList.remove('hidden');
+                        
+                        updateVisualsBasedOnState(); 
+                        saveTasks(); 
+                        renderFilteredTasks(); 
+                    }
+
+                    editInput.addEventListener('keypress', function(event) {
+                        if (event.key === 'Enter') {
+                            event.preventDefault(); 
+                            saveEditChanges();
+                        }
+                    });
+                    
+                    originalEditButtonClickHandler = enterEditMode; 
+                    editButton.removeEventListener('click', enterEditMode); 
+                    editButton.addEventListener('click', saveEditChanges); 
+                }
+                
+                editButton.addEventListener('click', enterEditMode);
+
+                deleteButton.addEventListener('click', () => {
+                    showConfirmationModal(
+                        "Erase Objective", 
+                        `Are you sure you want to permanently erase the objective: "${taskSpan.textContent}"? This action cannot be undone.`, 
+                        () => { 
+                            listItem.classList.add('opacity-0', 'scale-90');
+                            setTimeout(() => {
+                                if (taskList.contains(listItem)) { 
+                                   taskList.removeChild(listItem);
+                                }
+                                saveTasks(); 
+                                renderFilteredTasks(); 
+                            }, 300); 
+                        }
+                    );
+                });
+
+                actionsDiv.appendChild(completeButton);
+                actionsDiv.appendChild(editButton); 
+                actionsDiv.appendChild(deleteButton);
+                
+                listItem.appendChild(actionsDiv);  
+
+                taskList.appendChild(listItem);
+            }
+
+            function handleAddTask() {
+                console.log("handleAddTask called"); 
+                if (!newTaskInput || !newTaskPriorityInput || !newTaskDueDateInput) {
+                    console.error("One of the new task input elements is not found!");
+                    return;
+                }
+                const taskText = newTaskInput.value.trim();
+                const taskPriority = newTaskPriorityInput.value; 
+                const taskDueDate = newTaskDueDateInput.value; 
+                if (taskText) {
+                    console.log("Task text is valid, creating element...");
+                    createTaskElement(taskText, false, taskPriority, taskDueDate); 
+                    newTaskInput.value = '';
+                    newTaskDueDateInput.value = ''; 
+                    saveTasks(); 
+                    renderFilteredTasks(); 
+                } else {
+                    console.log("Task text is empty.");
+                    newTaskInput.classList.add('border-red-500', 'animate-pulse');
+                    setTimeout(() => {
+                         newTaskInput.classList.remove('border-red-500', 'animate-pulse');
+                    }, 1000);
+                }
+                newTaskInput.focus();
+            }
+            
+            // --- Logika Pengurutan BARU / DIMODIFIKASI ---
+            const priorityOrderValues = { 
+                'Critical': 3,
+                'High': 2,
+                'Normal': 1,
+                'Low': 0 
+            };
+
+            const sortStates = [
+                { property: 'priority', order: 'desc', label: 'SORT: PRIORITY (EMERGENCY)', buttonClasses: ['bg-indigo-600', 'hover:bg-indigo-500'] },
+                { property: 'priority', order: 'asc',  label: 'SORT: PRIORITY (NORMAL)',  buttonClasses: ['bg-purple-600', 'hover:bg-purple-500'] },
+                { property: 'dueDate',  order: 'asc',  label: 'SORT: DUE DATE (SOONEST)', buttonClasses: ['bg-teal-600', 'hover:bg-teal-500'] },
+                { property: 'dueDate',  order: 'desc', label: 'SORT: DUE DATE (LATEST)',  buttonClasses: ['bg-sky-600', 'hover:bg-sky-500'] }
+            ];
+            let currentSortStateIndex = 0; 
+
+            function sortTasksByPriorityCycle(order) { 
+                if (!taskList) { console.error("Task list not found for sorting by priority."); return; }
+                const tasksLiElements = Array.from(taskList.querySelectorAll('li'));
+                
+                tasksLiElements.sort((a, b) => {
+                    const priorityAValue = priorityOrderValues[a.dataset.priority || 'Normal'] || 0;
+                    const priorityBValue = priorityOrderValues[b.dataset.priority || 'Normal'] || 0;
+                    return order === 'desc' ? priorityBValue - priorityAValue : priorityAValue - priorityBValue;
+                });
+                tasksLiElements.forEach(li => taskList.appendChild(li)); 
+            }
+
+            function sortTasksByDueDateCycle(order) {
+                if (!taskList) { console.error("Task list not found for sorting by due date."); return; }
+                const tasksLiElements = Array.from(taskList.querySelectorAll('li'));
+
+                tasksLiElements.sort((a, b) => {
+                    const dateStringA = a.dataset.dueDate;
+                    const dateStringB = b.dataset.dueDate;
+                    const hasDateA = dateStringA && dateStringA !== '';
+                    const hasDateB = dateStringB && dateStringB !== '';
+
+                    if (hasDateA && !hasDateB) return -1; 
+                    if (!hasDateA && hasDateB) return 1;
+                    if (!hasDateA && !hasDateB) return 0; 
+
+                    const dateA = new Date(dateStringA + 'T00:00:00Z');
+                    const dateB = new Date(dateStringB + 'T00:00:00Z');
+                    
+                    const isValidDateA = !isNaN(dateA.getTime());
+                    const isValidDateB = !isNaN(dateB.getTime());
+
+                    if (isValidDateA && !isValidDateB) return -1;
+                    if (!isValidDateA && isValidDateB) return 1;
+                    if (!isValidDateA && !isValidDateB) return 0;
+
+                    return order === 'asc' ? dateA - dateB : dateB - dateA; 
+                });
+                tasksLiElements.forEach(li => taskList.appendChild(li));
+            }
+
+            function applyCurrentSortAndRender() {
+                if (!sortButton) return; // Jika tombol sort tidak ada, jangan lakukan apa-apa
+                const activeSortState = sortStates[currentSortStateIndex];
+                if (activeSortState.property === 'priority') {
+                    sortTasksByPriorityCycle(activeSortState.order);
+                } else if (activeSortState.property === 'dueDate') {
+                    sortTasksByDueDateCycle(activeSortState.order);
+                }
+                // Update button text and style
+                sortButton.textContent = activeSortState.label;
+                // Hapus semua kelas warna tombol sort sebelumnya
+                sortStates.forEach(s => {
+                    s.buttonClasses.forEach(cls => sortButton.classList.remove(cls));
+                });
+                // Tambahkan kelas warna tombol untuk state baru
+                activeSortState.buttonClasses.forEach(cls => sortButton.classList.add(cls));
+
+                renderFilteredTasks(); 
+            }
+
+
+            // --- Event Listener untuk Tombol Filter Status & Input Pencarian & Sort ---
+            if (modalConfirmButton) { modalConfirmButton.addEventListener('click', () => { if (typeof actionToConfirmCallback === 'function') { actionToConfirmCallback(); } hideConfirmationModal(); });}
+            if (modalCancelButton) { modalCancelButton.addEventListener('click', hideConfirmationModal); }
+            if (confirmationModal) { confirmationModal.addEventListener('click', (event) => { if (event.target === confirmationModal) { hideConfirmationModal(); } }); }
+            
+            if (filterButtonsContainer) { 
+                const filterButtons = filterButtonsContainer.querySelectorAll('.filter-btn'); 
+                filterButtons.forEach(button => { 
+                    button.addEventListener('click', () => { 
+                        filterButtons.forEach(btn => { 
+                            btn.classList.remove('active-filter', 'bg-cyan-600', 'text-white'); 
+                            btn.classList.add('bg-slate-600', 'text-gray-300'); 
+                        }); 
+                        button.classList.add('active-filter', 'bg-cyan-600', 'text-white'); 
+                        button.classList.remove('bg-slate-600', 'text-gray-300'); 
+                        renderFilteredTasks(); 
+                    }); 
+                }); 
+            }
+            if (searchInput) { searchInput.addEventListener('input', () => { renderFilteredTasks(); }); }
+            
+            if (addTaskButton) { 
+                addTaskButton.addEventListener('click', handleAddTask); 
+            } else {
+                console.error("INITIATE button (addTaskBtn) not found!");
+            }
+
+            if (newTaskInput) { 
+                newTaskInput.addEventListener('keypress', function(event) { 
+                    if (event.key === 'Enter') { 
+                        handleAddTask(); 
+                    } 
+                }); 
+            }
+            
+            if (sortButton) { 
+                // Inisialisasi tombol sort awal
+                const initialSortState = sortStates[currentSortStateIndex];
+                sortButton.textContent = initialSortState.label;
+                initialSortState.buttonClasses.forEach(cls => sortButton.classList.add(cls));
+
+                sortButton.addEventListener('click', () => { 
+                    currentSortStateIndex = (currentSortStateIndex + 1) % sortStates.length; 
+                    applyCurrentSortAndRender();
+                }); 
+            }
+
+            // --- Muat Tugas ---
+            console.log("Loading initial tasks...");
+            loadTasks(); 
+            console.log("Mission Log Initialized.");
+        });
+    </script>
+    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center hidden z-50 p-4 transition-opacity duration-300 ease-in-out opacity-0">
+        <div class="bg-slate-800 p-6 md:p-8 rounded-lg shadow-2xl w-full max-w-md text-center border border-slate-700 transform transition-all duration-300 ease-in-out scale-95" id="modalDialog">
+            <h3 class="text-xl font-bold text-cyan-400 mb-4" id="modalTitle">Confirm Action</h3>
+            <p class="text-gray-300 mb-8 text-sm" id="modalMessage">Are you sure you want to proceed?</p>
+            <div class="flex justify-around space-x-4">
+                <button id="modalCancelButton" 
+                        class="bg-slate-600 hover:bg-slate-500 text-gray-200 font-semibold py-2 px-6 rounded-md text-sm transition-colors duration-200 w-1/2">
+                    CANCEL
+                </button>
+                <button id="modalConfirmButton" 
+                        class="bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-6 rounded-md text-sm transition-colors duration-200 w-1/2">
+                    CONFIRM ERASE
+                </button>
+            </div>
+        </div>
+    </div>
+    </body>
+</html>
